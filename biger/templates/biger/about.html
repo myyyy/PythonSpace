@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}
+    关于我|Mr_Su 
+{% endblock %}
+{% block path %}
+    <a href = "{% url 'home'%}">当前位置&nbsp;:&nbsp;首页&nbsp;</a>»&nbsp;关于我
+{% endblock %}
+{% block content %}
+	
+
+	 <div class="archive">
+             <div id="archives">
+        <h3>
+         关于本站
+        </h3>
+       
+         <blockquote>
+               &nbsp;&nbsp;&nbsp;linux下Python web框架Django开发简易版,部署在CODING.NET
+               </br>
+               </br>
+               
+               若无特殊说明，本站所有文章均为原创文章，并遵循 <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0协议</a> 发布
+
+        </blockquote>
+        </br>
+       
+        <h3>
+        关于我
+        </h3>
+    
+
+        <blockquote>
+               &nbsp;&nbsp;&nbsp;Software Engineering 大四学渣一枚,熟悉Java,了解NodeJS,Python等。没有什么
+               </br></br>特殊偏好，什么好玩搞什么。伪文艺青年。
+        </blockquote>
+        </br>
+        <ul>
+              
+                
+               
+        </ul>
+        
+        <h3>联系我
+        </h3>
+        <ul>
+        <li>博客:&nbsp;&nbsp;&nbsp;<a href="http://krsu.coding.io/">KR的小站</li></a>
+        <li>邮箱:&nbsp;&nbsp;&nbsp;100714131@qq.com </li>
+        <li>GitHub:&nbsp;&nbsp;<a href="https://coding.net/u/sis">__init__</a></li>
+        <li>豆瓣:&nbsp;&nbsp;&nbsp;让改变发生 </li>
+        <!-- <li>知乎:&nbsp;&nbsp;&nbsp;<a href="http://www.zhihu.com/people/kan-tmac">kan_tmac</a></li> -->
+        </ul>
+
+</div>
+</div>
+
+
+          {% include "biger/_comments.html" %}
+
+	
+{% endblock %}
+
+{% block side %}
+	 {% include "biger/_side.html" %}
+{% endblock %}
+
+
