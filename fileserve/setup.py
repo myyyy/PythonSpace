@@ -6,7 +6,7 @@ install_requires = [
 
 setup(
     name='fileserve',
-    version='0.1',
+    version='0.2',
     description='tornado simple HttpService',
     author='syf',
     author_email='git@suyafei.com',
@@ -15,8 +15,9 @@ setup(
     license='BSD',
     py_modules=['fileserve'],
     packages = ['fileserve'],
+    scripts = ['fileserve/server.py'],
     package_data={'fileserve': ['static/*',
-        'static/index.html'
+        'templates/index.html'
     ]},
     zip_safe=False,
     install_requires=install_requires,
