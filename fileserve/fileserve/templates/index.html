@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Tornado Chat Demo</title>
+    <link href="video-js.css" rel="stylesheet" type="text/css">
+   <script src="video.js"></script>
+  </head>
+
+  <body>
+  <div>
+{%for file in files%}
+<a href="
+{%if handler.request.uri != '/'%}
+{{handler.request.uri}}
+{%end%}/
+{{file}}
+">{{file}}</a>
+{% end %}
+  </div>
+  </body>
+  <script>
+    videojs.options.flash.swf = "video-js.swf";
+</script>
+</html>
