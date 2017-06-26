@@ -49,8 +49,7 @@ class IndexHandler(BaseHandler):
                 self.write(data)
 
         if os.path.isdir(path):
-            print path
-            files = [item for item in os.listdir(path)]
+            files = fu.file_classifiter(path)
             print files
             self.render('index.html',files=files,path=path)
     def post(self):

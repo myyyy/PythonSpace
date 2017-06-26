@@ -58,3 +58,20 @@ def translate_path(self):
         path = os.path.join(path, word)
 
     return path
+
+def file_classifiter(path):
+    """
+    The filetype classifiter
+    """
+    video = ['.avi' ,'.rmvb' ,'.rm' ,'.asf' ,'.divx' ,'.mpg' ,'.mpeg' ,'.mpe' ,'.wmv' ,'.mp4' ,'.mkv']
+    doc = ['.html','.md','.json','.py']
+    files = {'video':[],'doc':[],'others':[]}
+    for item in os.listdir(path):
+        if os.path.splitext(item)[1] in video:
+            files['video'].append(item)
+        if os.path.splitext(item)[1] in doc:
+            files['doc'].append(item)
+        else:
+            files['others'].append(item)
+    print files
+    return files

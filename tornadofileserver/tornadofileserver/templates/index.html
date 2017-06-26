@@ -3,14 +3,32 @@
 <title>Directory listing for {{handler.request.uri}}</title>
 
 <body>
-    <h2>Directory listing for {{handler.request.uri}}</h2>
+    <h2>Directory listing for video</h2>
     <hr>
     <ul>
-            {%for file in files%}
+            {%for file in files.get('video',[])%}
             <li><a href="{%if handler.request.uri != '/' %}{{handler.request.uri}}{%end%}/{{file}}">{{file}}</a></li>
             {% end %}
     </ul>
     <hr>
+
+    <h2>Directory listing for doc</h2>
+
+    <ul>
+            {%for file in files.get('doc',[])%}
+            <li><a href="{%if handler.request.uri != '/' %}{{handler.request.uri}}{%end%}/{{file}}">{{file}}</a></li>
+            {% end %}
+    </ul>
+
+    <h2>Directory listing for other</h2>
+
+    <ul>
+            {%for file in files.get('others',[])%}
+            <li><a href="{%if handler.request.uri != '/' %}{{handler.request.uri}}{%end%}/{{file}}">{{file}}</a></li>
+            {% end %}
+    </ul>
+
+    
 </body>
 
 </html>
