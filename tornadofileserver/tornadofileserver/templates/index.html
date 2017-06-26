@@ -1,0 +1,16 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<title>Directory listing for {{handler.request.uri}}</title>
+
+<body>
+    <h2>Directory listing for {{handler.request.uri}}</h2>
+    <hr>
+    <ul>
+            {%for file in files%}
+            <li><a href="{%if handler.request.uri != '/' %}{{handler.request.uri}}{%end%}/{{file}}">{{file}}</a></li>
+            {% end %}
+    </ul>
+    <hr>
+</body>
+
+</html>

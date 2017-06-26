@@ -1,23 +1,7 @@
-# -*- coding: utf-8 -*-
 #!/usr/bin/env python
-#
-# Copyright 2009 Facebook
-#
-# Licensed under the Apache License, Version 2.0 (the "License"); you may
-# not use this file except in compliance with the License. You may obtain
-# a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-# License for the specific language governing permissions and limitations
-# under the License.
-"""Simplified chat demo for websockets.
+# -*- coding: utf-8 -*-
 
-Authentication, error handling, etc are left as an exercise for the reader :)
-"""
+
 import tornado.ioloop
 import tornado.web
 import json
@@ -26,11 +10,13 @@ import gridfs
 import os
 import logging
 
-
 import tornado.options
 from tornado.options import define, options
 
-define("port", default=8000, help="run on the given port", type=int)
+import file_util as fu
+
+define("port", default=8999, help="run on the given port", type=int)
+
 
 
 class Application(tornado.web.Application):
@@ -52,24 +38,21 @@ class BaseHandler(tornado.web.RequestHandler):
     pass
 class IndexHandler(BaseHandler):
     def get(self):
-        # import pdb;pdb.set_trace()
-        uri =self.request.uri 
-        path = os.getcwd()
-        file_path = path+uri
-        if os.path.isfile(file_path):
-            file_name = uri.split('/')[-1]
-            self.set_header ('Content-Type', 'application/octet-stream')
-            self.set_header ('Content-Disposition', 'attachment; filename{}'.format(file_name))
-
-            with open(file_path, 'rb') as f:
+        path = fu.translate_path(self)
+        if os.path.isfile(path):
+            # file_name = uri.split('/')[-1]
+            ctype = fu.guess_type(self,path)
+            with open(path, 'rb') as f:
                 data = f.read()
+                # application/octet-stream
+                self.set_header ('Content-Type', ctype)
                 self.write(data)
 
-        if os.path.isdir(file_path):
-
-            files = [item for item in os.listdir(file_path)]
+        if os.path.isdir(path):
+            print path
+            files = [item for item in os.listdir(path)]
             print files
-            self.render('index.html',files=files)
+            self.render('index.html',files=files,path=path)
     def post(self):
         # TODO 上传文件
         pass
