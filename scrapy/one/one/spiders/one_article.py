@@ -39,8 +39,10 @@ class OneArticleSpider(scrapy.spiders.Spider):
             file.write('###'+article['author']+'\n')
             for art in article['content']:
                 try:
-                    file.write(art.css("::text").extract_first()+'\n')
+                    body = art.xpath("text()").extract_first()
+                    file.write(body+'\n')
+                    print body
                 except Exception as e:
                     pass
-        qiuniu_upload('/tmp/one_article.md','test2.md')
+        qiuniu_upload('/tmp/one_article.md',article['title']+'.md')
         print '11111'
