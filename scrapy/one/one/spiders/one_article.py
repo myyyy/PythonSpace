@@ -32,7 +32,6 @@ class OneArticleSpider(scrapy.spiders.Spider):
         article['title'] = response.css('.articulo-titulo::text').extract_first().strip()
         article['author'] = response.css('.articulo-autor::text').extract_first().strip()
         article['description'] = response.css('meta[name=description]::attr(content)').extract_first().strip()
-        import pdb;pdb.set_trace()
         article['content'] = response.css('.articulo-contenido').xpath('.//p')
         with open('/tmp/one_article.md', 'w') as file:
             file.write('> '+article['description']+'\n\n')
