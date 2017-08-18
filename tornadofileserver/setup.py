@@ -32,4 +32,10 @@ setup(
         "Programming Language :: Python",
     ],
     zip_safe=False,
+    # entry_points　解释：http://python.jobbole.com/82077/
+    entry_points={
+        'console_scripts':[
+        'yd=tornadofileserver.server:main'
+        ]
+    },
 )
