@@ -4,4 +4,7 @@
 
 ### 安装
 
-pip install fileserve
+pip install tornadofileserver
+
+### 启动
+python -m tornadofileserver.server 
