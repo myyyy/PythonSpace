@@ -43,8 +43,8 @@ class RequestTokenHandler(BaseHandler):
         # https://api.weibo.com/oauth2/authorize?client_id=1473879058&redirect_uri=xxx&response_type=code&state=sina7d3521db1a403d39cee2815ff42289ce
         uri=self.request.uri
         print uri
-        import pdb;pdb.set_trace()
         oauth_request = oauth.Request.from_request('GET',uri)
+        import pdb;pdb.set_trace()
         token = oauth.Token(self.key, self.secret)
 
         self.render('index.html',token=token)
