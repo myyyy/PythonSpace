@@ -8,11 +8,13 @@ import urlparse
 import hmac
 import binascii
 
+from cache import Cache
 
 VERSION = '1.0'
 HTTP_METHOD = 'GET'
 SIGNATURE_METHOD = 'PLAINTEXT'
 
+CODE_TIMEOUT = 60 * 10
 
 class OAuthError(RuntimeError):
     """Generic exception class."""
@@ -60,6 +62,13 @@ class Consumer(object):
     def __init__(self, key, secret):
         self.key = key
         self.secret = secret
+
+class Code(object):
+    def set(code,owner):
+        Cache().setex(code, owner, CACHE_TIMEOUT)
+    def get_code(code)
+        owner = Cache().get(key)
+        return owner
 
 
 class Token(object):
