@@ -1,181 +1,106 @@
-"""
-The MIT License
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-Copyright (c) 2007 Leah Culver
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+import tornado.ioloop
+import tornado.web
+import json
+from pymongo import MongoClient
+import gridfs
+import os
+import logging
 
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
+import tornado.options
+from tornado.options import define, options
+import oauth2 as oauth
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
 
-Example consumer. This is not recommended for production.
-Instead, you'll want to create your own subclass of OAuthClient
-or find one that works with your web framework.
-"""
+define("port", default=8999, help="run on the given port", type=int)
 
-import httplib
-import time
-import oauth.oauth as oauth
+USER={'suyf':'111'}
+class Application(tornado.web.Application):
+    def __init__(self):
+        handlers = [
+            # (r"/", IndexHandler),
+            (r"/request_token", RequestTokenHandler),
+            (r"/access_token", AccessTokenHandler),
+            (r"/authorize", AuthorizeHandler),
+            (r"/resource", ResourceHandler),
+        ]
+        settings = dict(
+            cookie_secret="61oETzKXQAGaYdkL5gEmGeJJFuYh7EQnp2XdTP1o/Vo=",
+            template_path=os.path.join(os.path.dirname(__file__), "templates"),
+            static_path=os.path.join(os.path.dirname(__file__), "static"),
+            xsrf_cookies=True,
+        )
+        super(Application, self).__init__(handlers, **settings)
 
-# settings for the local test consumer
-SERVER = 'localhost'
-PORT = 8080
+class BaseHandler(tornado.web.RequestHandler):
+    pass
 
-# fake urls for the test server (matches ones in server.py)
-REQUEST_TOKEN_URL = 'https://photos.example.net/request_token'
-ACCESS_TOKEN_URL = 'https://photos.example.net/access_token'
-AUTHORIZATION_URL = 'https://photos.example.net/authorize'
-CALLBACK_URL = 'http://printer.example.com/request_token_ready'
-RESOURCE_URL = 'http://photos.example.net/photos'
+class RequestTokenHandler(BaseHandler):
+    def get(self):
+        # https://api.weibo.com/oauth2/authorize?client_id=1473879058&redirect_uri=xxx&response_type=code&state=sina7d3521db1a403d39cee2815ff42289ce
+        uri=self.request.uri
+        print uri
+        import pdb;pdb.set_trace()
+        oauth_request = oauth.Request.from_request('GET',uri)
+        token = oauth.Token(self.key, self.secret)
 
-# key and secret granted by the service provider for this consumer
-# application - same as the MockOAuthDataStore
-CONSUMER_KEY = 'key'
-CONSUMER_SECRET = 'secret'
+        self.render('index.html',token=token)
+    def post(self):
+        name = self.get_argument('name')
+        pwd = self.get_argument('pwd')
+        import pdb;pdb.set_trace()
+        if USER.get(name) == pwd:
+            oauth_request = oauth.Request.from_request('POST',
+                self.path, headers=self.headers, query_string=None)
+        token = self.oauth_server.fetch_request_token(oauth_request)
 
-# example client using httplib with headers
-class SimpleOAuthClient(oauth.OAuthClient):
+class AuthorizeHandler(BaseHandler):
+    def get(self):
+        oauth_request = oauth.OAuthRequest.from_request('GET',self.path)
+        token = self.oauth_server.fetch_request_token(oauth_request)
+        self.send_response(200, 'OK')
+        self.end_headers()
+        # return the token
+        self.wfile.write(token.to_string())
 
-    def __init__(self, server, port=httplib.HTTP_PORT, request_token_url='',
-                 access_token_url='', authorization_url=''):
-        self.server = server
-        self.port = port
-        self.request_token_url = request_token_url
-        self.access_token_url = access_token_url
-        self.authorization_url = authorization_url
-        self.connection = httplib.HTTPConnection(
-                            "%s:%d" % (self.server, self.port))
+class AccessTokenHandler(BaseHandler):
+    def get(self):
+        oauth_request = oauth.OAuthRequest.from_request('GET',self.path)
+        token = self.oauth_server.fetch_request_token(oauth_request)
+        self.send_response(200, 'OK')
+        self.end_headers()
+        # return the token
+        self.wfile.write(token.to_string())
 
-    def fetch_request_token(self, oauth_request):
-        # via headers
-        # -> OAuthToken
-        self.connection.request(oauth_request.http_method,
-            self.request_token_url, headers=oauth_request.to_header()) 
-        response = self.connection.getresponse()
-        return oauth.OAuthToken.from_string(response.read())
 
-    def fetch_access_token(self, oauth_request):
-        # via headers
-        # -> OAuthToken
-        self.connection.request(oauth_request.http_method,
-            self.access_token_url, headers=oauth_request.to_header()) 
-        response = self.connection.getresponse()
-        return oauth.OAuthToken.from_string(response.read())
+class ResourceHandler(BaseHandler):
+    def get(self):
+        oauth_request = oauth.OAuthRequest.from_request('GET',self.path)
+        token = self.oauth_server.fetch_request_token(oauth_request)
+        self.send_response(200, 'OK')
+        self.end_headers()
+        # return the token
+        self.wfile.write(token.to_string())
 
-    def authorize_token(self, oauth_request):
-        # via url
-        # -> typically just some okay response
-        self.connection.request(oauth_request.http_method,
-            oauth_request.to_url()) 
-        response = self.connection.getresponse()
-        return response.read()
 
-    def access_resource(self, oauth_request):
-        # via post body
-        # -> some protected resources
-        headers = {'Content-Type' :'application/x-www-form-urlencoded'}
-        self.connection.request('POST', RESOURCE_URL,
-                                body=oauth_request.to_postdata(),
-                                headers=headers)
-        response = self.connection.getresponse()
-        return response.read()
+class ErrorHandler(tornado.web.RequestHandler):
+    @tornado.web.asynchronous
+    def get(self):
+        self.redirect('/')
 
-def run_example():
 
-    # setup
-    print('** OAuth Python Library Example **')
-    client = SimpleOAuthClient(SERVER, PORT, REQUEST_TOKEN_URL,
-                               ACCESS_TOKEN_URL, AUTHORIZATION_URL)
-    consumer = oauth.OAuthConsumer(CONSUMER_KEY, CONSUMER_SECRET)
-    signature_method_plaintext = oauth.OAuthSignatureMethod_PLAINTEXT()
-    signature_method_hmac_sha1 = oauth.OAuthSignatureMethod_HMAC_SHA1()
-    pause()
+def main():
+    tornado.options.parse_command_line()
+    app = Application()
+    app.listen(options.port)
+    logging.info('Serving HTTP on 0.0.0.0 port %d ...' % options.port)
+    tornado.ioloop.IOLoop.current().start()
 
-    # get request token
-    print('* Obtain a request token ...')
-    pause()
-    oauth_request = oauth.OAuthRequest.from_consumer_and_token(
-        consumer, callback=CALLBACK_URL, http_url=client.request_token_url)
-    oauth_request.sign_request(signature_method_plaintext, consumer, None)
-    print('REQUEST (via headers)')
-    print('parameters: %s' % str(oauth_request.parameters))
-    pause()
-    token = client.fetch_request_token(oauth_request)
-    print('GOT')
-    print('key: %s' % str(token.key))
-    print('secret: %s' % str(token.secret))
-    print('callback confirmed? %s' % str(token.callback_confirmed))
-    pause()
 
-    print('* Authorize the request token ...')
-    pause()
-    oauth_request = oauth.OAuthRequest.from_token_and_callback(
-        token=token, http_url=client.authorization_url)
-    print('REQUEST (via url query string)')
-    print('parameters: %s' % str(oauth_request.parameters))
-    pause()
-    # this will actually occur only on some callback
-    response = client.authorize_token(oauth_request)
-    print('GOT')
-    print(response)
-    # sad way to get the verifier
-    import urlparse, cgi
-    query = urlparse.urlparse(response)[4]
-    params = cgi.parse_qs(query, keep_blank_values=False)
-    verifier = params['oauth_verifier'][0]
-    print('verifier: %s' % verifier)
-    pause()
+if __name__ == "__main__":
+    main()
 
-    # get access token
-    print('* Obtain an access token ...')
-    pause()
-    oauth_request = oauth.OAuthRequest.from_consumer_and_token(
-        consumer, token=token, verifier=verifier,
-        http_url=client.access_token_url)
-    oauth_request.sign_request(signature_method_plaintext, consumer, token)
-    print('REQUEST (via headers)')
-    print('parameters: %s' % str(oauth_request.parameters))
-    pause()
-    token = client.fetch_access_token(oauth_request)
-    print('GOT')
-    print('key: %s' % str(token.key))
-    print('secret: %s' % str(token.secret))
-    pause()
 
-    # access some protected resources
-    print('* Access protected resources ...')
-    pause()
-    parameters = {'file': 'vacation.jpg',
-                  'size': 'original'} # resource specific params
-    oauth_request = oauth.OAuthRequest.from_consumer_and_token(consumer,
-        token=token, http_method='POST', http_url=RESOURCE_URL,
-        parameters=parameters)
-    oauth_request.sign_request(signature_method_hmac_sha1, consumer, token)
-    print('REQUEST (via post body)')
-    print('parameters: %s' % str(oauth_request.parameters))
-    pause()
-    params = client.access_resource(oauth_request)
-    print('GOT')
-    print('non-oauth parameters: %s' % params)
-    pause()
-
-def pause():
-    print('')
-    time.sleep(1)
-
-if __name__ == '__main__':
-    run_example()
-    print('Done.')
