@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 class Node(object):
     def __init__(self, arg,_next=None):
         self.val=arg
@@ -12,7 +14,7 @@ class LinkedList(object):
 
     def creat(self,_list):
         if not _list:
-            print 'no elements'
+            print '空链表'
             return
         self.head=Node(_list[0])
         _head = self.head
@@ -23,7 +25,7 @@ class LinkedList(object):
         return self.head
     def show(self,head):
         if not head:
-            print 'no elements'
+            print '空链表'
             return
         a=[str(head.val)]
         while head.next:
@@ -32,24 +34,22 @@ class LinkedList(object):
             head=_head
         print ','.join(a)
 
-    def sort(self,head):
-        if not head:
-            print 'no elements'
-            return
-        new = Node(0)
-        while head.next:
-            node=new
-            nl = head.next
-            while node.next is not None and node.next.val < head.val:
-                node= node.next
-            head.next = node.next
-            node.next=head
-            head = nl
-        return head
+    def _inster_sort(self,head):
+        if head == None:
+            return head
+        p = Node(0)
+        while head:
+            node = p
+            print p.val,p.next,head.next
+            while node.next!=None and node.next.val<head.val:
+                node = node.next
+            tmp = head.next
+            head.next,node.next = node.next,head
+            head = tmp
+        return p.next 
 if __name__ == '__main__':
-    a=[2,1]
+    a=[2,1,3]
     head = LinkedList().creat(a)
     LinkedList().show(head)
-    import pdb;pdb.set_trace()
-    head = LinkedList().sort(head)
-    print '1111'
+    head = LinkedList()._inster_sort(head)
+    LinkedList().show(head)
