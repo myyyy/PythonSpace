@@ -2,6 +2,7 @@
 import time
 import threading
 import Queue
+from redis import Redis
 
 """
     Cache().setex(k, v, timeout)
@@ -17,7 +18,6 @@ class Cache(object):
 
     def __new__(cls, *args, **kw):
         if not hasattr(cls, '_instance_'):
-            #print 'Cache __new__'
             orig = super(Cache, cls)
             cls._instance_ = orig.__new__(cls, *args, **kw)
 
@@ -35,7 +35,16 @@ class Cache(object):
 
         return cls._instance_
 
-    def setex(self, k, v, ex = None):
+    def get_redis(cls, host):
+        ''' get redis from context '''
+        h, p = host.split(":") if ":" in host else (host, 6379)
+
+        if not hasattr(cls,'__cache__') or (cls.__cache__ and not cls.__cache__.ping()):
+            cls.__cache__ = Redis(host=h, port=int(p), socket_timeout=10)
+
+        return cls.__cache__
+
+    def setex(self, k, v, ex = 60 * 5):
         """
             k, v, ex = expire
         """
@@ -62,10 +71,13 @@ class Cache(object):
             now = time.time()
             for k, v in self.c2.items():
                 func, args, kwargs = v
-                func(*args, **kwargs)
+                try:
+                    func(*args, **kwargs)
+                except Exception as e:
+                    pass
                 self.c2.pop(k, None)
 
-            time.sleep(2)
+            time.sleep(10)
 
     def queue_set(self, func, *args, **kwargs):
         self._queue.put((func, args, kwargs))
@@ -76,13 +88,11 @@ class Cache(object):
             try:
                 func(*args, **kwargs)
             except Exception as e:
-                import traceback
-                traceback.print_exc()
+                pass
 
 if __name__ == '__main__':
     Cache().setex(1, 2, 6)
     for i in range(10):
-        print Cache().get(1)
         time.sleep(1)
 
     import tornado.ioloop

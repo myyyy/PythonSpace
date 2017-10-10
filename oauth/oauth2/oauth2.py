@@ -7,6 +7,9 @@ import random
 import urlparse
 import hmac
 import binascii
+import os
+import rsa
+from binascii import b2a_hex, a2b_hex
 
 from cache import Cache
 
@@ -14,7 +17,7 @@ VERSION = '1.0'
 HTTP_METHOD = 'GET'
 SIGNATURE_METHOD = 'PLAINTEXT'
 
-CODE_TIMEOUT = 60 * 10
+CACHE_TIMEOUT = 60 * 1000
 
 class OAuthError(RuntimeError):
     """Generic exception class."""
@@ -64,12 +67,14 @@ class Consumer(object):
         self.secret = secret
 
 class Code(object):
-    def set(code,owner):
-        Cache().setex(code, owner, CACHE_TIMEOUT)
-    def get_code(code)
-        owner = Cache().get(key)
+    def set(self,client_id,owner):
+        code = RsaEncryption().encrypt(str(client_id+","+owner))
+        Cache().get_redis(__conf__.CACHE_HOST).setex(code,owner, CACHE_TIMEOUT)
+        return code
+    def get(self,code):
+        owner = Cache().get_redis(__conf__.CACHE_HOST).get(code)
+        # Cache().get_redis(__conf__.CACHE_HOST).delete(code)
         return owner
-
 
 class Token(object):
     """Token is a data type that represents an End User via either an access
@@ -645,3 +650,36 @@ class SignatureMethod_PLAINTEXT(SignatureMethod):
         key, raw = self.build_signature_base_string(oauth_request, consumer,
             token)
         return key
+
+
+
+class RsaEncryption(object):
+
+    def __init__(self):
+        self.pubkey,self.privkey = self.get_key()
+
+    def get_key(self):
+        """初始化公钥秘钥"""
+        if not os.path.exists('public.pem'):
+            (pubkey, privkey) = rsa.newkeys(1024)
+            with open('public.pem','w+') as f:
+                f.write(pubkey.save_pkcs1().decode())
+            with open('private.pem','w+') as f:
+                f.write(privkey.save_pkcs1().decode())
+        with open('public.pem','r') as f:
+            pubkey = rsa.PublicKey.load_pkcs1(f.read().encode())
+        with open('private.pem','r') as f:
+            privkey = rsa.PrivateKey.load_pkcs1(f.read().encode())
+        return pubkey,privkey
+
+    def encrypt(self,message):
+        #加密
+        message = rsa.encrypt(message.encode(), self.pubkey)
+        message = b2a_hex(message)
+        return message
+    def decrypt(self,message):
+        #解密
+        message = a2b_hex(message)
+        message = rsa.decrypt(message, self.privkey).decode()
+        return message
+

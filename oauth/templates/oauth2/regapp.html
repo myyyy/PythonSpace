@@ -1,0 +1,16 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<title></title>
+
+<body>
+    <form action="/oauth2/appinfo" method="post" >
+    {% raw xsrf_form_html() %}
+    url: <input type="text" name='url' size="20" value="http://baidu.com"><br />
+    <br />
+     <input type="submit" value="submit" />
+
+
+    </form>
+</body>
+
+</html>

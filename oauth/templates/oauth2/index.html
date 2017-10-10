@@ -1,0 +1,22 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<title></title>
+
+<body>
+    <form id="refuse_form" method="post" action="{{uri}}">
+        <input type="hidden" name="refuse" value="1">
+    </form>
+
+    <form action="{{uri}}" method="post" >
+    {% raw xsrf_form_html() %}
+    user: <input type="text" name='name' size="20" value="suyf"><br />
+    pwd: <input type="text"  name='pwd' size="20" value="111111"><br />
+    token: <input type="text"  name='token' size="20" value="{{1}}"><br />
+
+    <br />
+     <input type="submit" name="confirm" value="授权">
+    <input type="button" value="拒绝" onclick="javascript:document.forms['refuse_form'].submit();">
+    </form>
+</body>
+
+</html>
