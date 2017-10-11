@@ -48,7 +48,7 @@ class LinkedList(object):
             head = tmp
         return p.next 
 if __name__ == '__main__':
-    a=[2,1,3]
+    a=[2,1,3,6,2,4]
     head = LinkedList().creat(a)
     LinkedList().show(head)
     head = LinkedList()._inster_sort(head)

@@ -11,6 +11,8 @@ import os
 import rsa
 from binascii import b2a_hex, a2b_hex
 
+import base64
+import json
 from cache import Cache
 
 VERSION = '1.0'
@@ -61,20 +63,12 @@ class Consumer(object):
     """
     key = None
     secret = None
-
+    to_str=None
     def __init__(self, key, secret):
         self.key = key
         self.secret = secret
+        self.to_str = str(key+','+secret)
 
-class Code(object):
-    def set(self,client_id,owner):
-        code = RsaEncryption().encrypt(str(client_id+","+owner))
-        Cache().get_redis(__conf__.CACHE_HOST).setex(code,owner, CACHE_TIMEOUT)
-        return code
-    def get(self,code):
-        owner = Cache().get_redis(__conf__.CACHE_HOST).get(code)
-        # Cache().get_redis(__conf__.CACHE_HOST).delete(code)
-        return owner
 
 class Token(object):
     """Token is a data type that represents an End User via either an access
@@ -161,13 +155,48 @@ class Request(object):
     """
     parameters = None # OAuth parameters.
     http_method = HTTP_METHOD
-    http_url = None
+    uri = None
     version = VERSION
-
-    def __init__(self, http_method=HTTP_METHOD, http_url=None, parameters=None):
+    path =  None
+    def __init__(self, http_method=HTTP_METHOD, uri=None, parameters=None):
         self.http_method = http_method
-        self.http_url = http_url
+        self.uri = uri or self.get_uri()
         self.parameters = parameters or {}
+        self.path = self.get_normalized_uri()
+
+    @staticmethod
+    def from_request(uri,http_method=HTTP_METHOD, headers=None, parameters=None,
+            query_string=None):
+        """Combines multiple parameter sources."""
+        if parameters is None:
+            parameters = {}
+
+        # Headers
+        if headers and 'Authorization' in headers:
+            auth_header = headers['Authorization']
+            # Check that the authorization header is OAuth.
+            if auth_header[:6] == 'OAuth ':
+                auth_header = auth_header[6:]
+                try:
+                    # Get the parameters from the header.
+                    header_params = Request._split_header(auth_header)
+                    parameters.update(header_params)
+                except Exception:
+                    raise OAuthError('Unable to parse OAuth parameters from '
+                        'Authorization header.')
+
+        # GET or POST query string.
+        if query_string:
+            query_params = Request._split_url_string(query_string)
+            parameters.update(query_params)
+
+        param_str = urlparse.urlparse(uri)[4] # query
+        url_params = Request._split_url_string(param_str)
+        parameters.update(url_params)
+
+        if parameters:
+            return Request(http_method, uri, parameters)
+        return None
 
     def set_parameter(self, parameter, value):
         self.parameters[parameter] = value
@@ -206,9 +235,9 @@ class Request(object):
         return '&'.join(['%s=%s' % (escape(str(k)), escape(str(v))) \
             for k, v in self.parameters.iteritems()])
 
-    def to_url(self):
+    def get_uri(self):
         """Serialize as a URL for a GET request."""
-        return '%s?%s' % (self.get_normalized_http_url(), self.to_postdata())
+        return '%s?%s' % (self.get_normalized_uri(), self.to_postdata())
 
     def get_normalized_parameters(self):
         """Return a string that contains the parameters that must be signed."""
@@ -230,9 +259,9 @@ class Request(object):
         """Uppercases the http method."""
         return self.http_method.upper()
 
-    def get_normalized_http_url(self):
+    def get_normalized_uri(self):
         """Parses the URL and rebuilds it to be scheme://host/path."""
-        parts = urlparse.urlparse(self.http_url)
+        parts = urlparse.urlparse(self.uri)
         scheme, netloc, path = parts[:3]
         # Exclude default port numbers.
         if scheme == 'http' and netloc[-3:] == ':80':
@@ -254,45 +283,9 @@ class Request(object):
         """Calls the build signature method within the signature method."""
         return signature_method.build_signature(self, consumer, token)
 
-    def from_request(http_method, http_url, headers=None, parameters=None,
-            query_string=None):
-        """Combines multiple parameter sources."""
-        if parameters is None:
-            parameters = {}
-
-        # Headers
-        if headers and 'Authorization' in headers:
-            auth_header = headers['Authorization']
-            # Check that the authorization header is OAuth.
-            if auth_header[:6] == 'OAuth ':
-                auth_header = auth_header[6:]
-                try:
-                    # Get the parameters from the header.
-                    header_params = Request._split_header(auth_header)
-                    parameters.update(header_params)
-                except Exception:
-                    raise OAuthError('Unable to parse OAuth parameters from '
-                        'Authorization header.')
-
-        # GET or POST query string.
-        if query_string:
-            query_params = Request._split_url_string(query_string)
-            parameters.update(query_params)
-
-        # URL parameters.
-        param_str = urlparse.urlparse(http_url)[4] # query
-        url_params = Request._split_url_string(param_str)
-        parameters.update(url_params)
-
-        if parameters:
-            return Request(http_method, http_url, parameters)
-
-        return None
-    from_request = staticmethod(from_request)
-
     def from_consumer_and_token(oauth_consumer, token=None,
             callback=None, verifier=None, http_method=HTTP_METHOD,
-            http_url=None, parameters=None):
+            uri=None, parameters=None):
         if not parameters:
             parameters = {}
 
@@ -317,11 +310,11 @@ class Request(object):
             # 1.0a support for callback in the request token request.
             parameters['oauth_callback'] = callback
 
-        return Request(http_method, http_url, parameters)
+        return Request(http_method, uri, parameters)
     from_consumer_and_token = staticmethod(from_consumer_and_token)
 
     def from_token_and_callback(token, callback=None, http_method=HTTP_METHOD,
-            http_url=None, parameters=None):
+            uri=None, parameters=None):
         if not parameters:
             parameters = {}
 
@@ -330,7 +323,7 @@ class Request(object):
         if callback:
             parameters['oauth_callback'] = callback
 
-        return Request(http_method, http_url, parameters)
+        return Request(http_method, uri, parameters)
     from_token_and_callback = staticmethod(from_token_and_callback)
 
     def _split_header(header):
@@ -357,6 +350,10 @@ class Request(object):
             parameters[k] = urllib.unquote(v[0])
         return parameters
     _split_url_string = staticmethod(_split_url_string)
+
+
+
+
 
 class Server(object):
     """A worker to check the validity of a request against a data store."""
@@ -603,55 +600,31 @@ class SignatureMethod_HMAC_SHA1(SignatureMethod):
 
     def get_name(self):
         return 'HMAC-SHA1'
-        
-    def build_signature_base_string(self, oauth_request, consumer, token):
-        sig = (
-            escape(oauth_request.get_normalized_http_method()),
-            escape(oauth_request.get_normalized_http_url()),
-            escape(oauth_request.get_normalized_parameters()),
-        )
-
-        key = '%s&' % escape(consumer.secret)
-        if token:
-            key += escape(token.secret)
-        raw = '&'.join(sig)
-        return key, raw
-
-    def build_signature(self, oauth_request, consumer, token):
+    def build_signature(self, payload, header):
         """Builds the base signature string."""
-        key, raw = self.build_signature_base_string(oauth_request, consumer,
-            token)
+
 
         # HMAC object.
         try:
             import hashlib # 2.5
-            hashed = hmac.new(key, raw, hashlib.sha1)
+            hashed = hmac.new(payload, header, hashlib.sha1)
+            hashed.update(payload)
         except ImportError:
             import sha # Deprecated
-            hashed = hmac.new(key, raw, sha)
+            hashed = hmac.new(payload, header, sha)
+            hashed.update(payload)
 
         # Calculate the digest base 64.
-        return binascii.b2a_base64(hashed.digest())[:-1]
+        return hashed.hexdigest()
 
-
-class SignatureMethod_PLAINTEXT(SignatureMethod):
-
-    def get_name(self):
-        return 'PLAINTEXT'
-
-    def build_signature_base_string(self, oauth_request, consumer, token):
-        """Concatenates the consumer key and secret."""
-        sig = '%s&' % escape(consumer.secret)
-        if token:
-            sig = sig + escape(token.secret)
-        return sig, sig
-
-    def build_signature(self, oauth_request, consumer, token):
-        key, raw = self.build_signature_base_string(oauth_request, consumer,
-            token)
-        return key
-
-
+#auth :suyf
+class SignatureMethod_MD5(object):
+    def build_signature(self, payload, header):
+        import hashlib
+        _str = payload[::-1]+'.'+header[::-1]
+        m = hashlib.md5()
+        m.update(_str)
+        return m.hexdigest()
 
 class RsaEncryption(object):
 
@@ -683,3 +656,56 @@ class RsaEncryption(object):
         message = rsa.decrypt(message, self.privkey).decode()
         return message
 
+class Code(object):
+    def set(self,client_id,owner):
+        code = RsaEncryption().encrypt(str(client_id+","+owner))
+        Cache().get_redis(__conf__.CACHE_HOST).setex(code,owner, CACHE_TIMEOUT)
+        return code
+    def get(self,code):
+        owner = Cache().get_redis(__conf__.CACHE_HOST).get(code)
+        # Cache().get_redis(__conf__.CACHE_HOST).delete(code)
+        return owner
+
+class AppToken(object):
+
+    TOKEN_TIMEOUT = 640000
+    header={
+    "typ": "JWT",
+    "alg": "HS256"
+    }
+    payload={}
+    def get_token(self,consumer):
+        owner= consumer.key
+        if owner and Cache().get_redis(__conf__.CACHE_HOST).get(owner):
+            Cache().get_redis(__conf__.CACHE_HOST).delete(owner)
+        self.payload['owner'] = owner
+        self.payload['start'] = time.time()
+        print json.dumps(self.payload),json.dumps(self.header)
+
+        self.payload = base64.b64encode(json.dumps(self.payload))
+        self.header = base64.b64encode(json.dumps(self.header))
+        print self.payload,self.header
+        sha_token= SignatureMethod_HMAC_SHA1().build_signature(self.payload,self.header)
+        Cache().get_redis(__conf__.CACHE_HOST).setex(consumer.key,sha_token, self.TOKEN_TIMEOUT)
+        return self.payload+'.'+self.header,self.TOKEN_TIMEOUT
+    def _get_owner(self,token):
+        try:
+            owner = json.loads(base64.b64decode(token[0])).get('owner','')
+        except Exception as e:
+            owner=None
+        return owner
+    def verify(self,token):
+        token = token.split('.')
+        owner = self._get_owner(token)
+        payload = base64.b64encode(base64.b64decode(token[0]))
+        header = base64.b64encode(base64.b64decode(token[1]))
+        print '1222',payload,header,base64.b64decode(token[0]),base64.b64decode(token[1])
+        sha= SignatureMethod_HMAC_SHA1().build_signature(payload,header)
+        if owner and sha == Cache().get_redis(__conf__.CACHE_HOST).get(owner):
+            return True ,'验证成功'
+        else:
+            return False ,'验证失败请重新授权'
+    def remove(self,token):
+        owner = _get_owner
+        Cache().get_redis(__conf__.CACHE_HOST).delete(owner)
+        return True
