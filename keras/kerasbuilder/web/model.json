@@ -1,0 +1,4 @@
+[{'name':'Dense', params:{
+    'input_dim':3,
+    'activation':'softmax'
+}}]

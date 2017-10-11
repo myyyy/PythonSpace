@@ -1,0 +1,93 @@
+
+{% for d in  default.get('params',[])%}
+<div class="form-group">
+  <label class="col-sm-3 control-label" for="">{{d.get('name')}}</label>
+    <div class="col-sm-6">
+        {% if d.get('dt','')=='bool'%}
+            <div class="form-control " style="border:none;">
+                    <input type="radio" name="{{d.get('name','')}}"  value="True"  {% if data.get(d.get('name')) ==True%} checked{% end %}>
+                      <label for="">true</label>
+                    <input type="radio" name="{{d.get('name','')}}"   value="False" {% if data.get(d.get('name')) ==False%} checked{% end %}>
+                       <label for="">false</label>
+             </div>
+             <div  class="form-control tooltips comments_tip"  data-placement="bottom" data-toggle="tooltip"  data-original-title="Tooltip on bottom" title="{{d.get('comments')}}" style="padding-top: 0px">{{d.get('comments')}}</div>
+        {% else %}
+        <input type="text" class="form-control" 
+        value="{% if data.get(d.get('name',''),'')%}{{data.get(d.get('name'),'')}}{% else %}{{d.get('default')}}{% end %}"
+        name="{{d.get('name','')}}" 
+        comments="{{d.get('comments','')}}" 
+            {% if d.get('regex')%}
+            datatype="{{d.get('regex')}}"
+            {% end %}
+        >
+        <div  class="form-control tooltips comments_tip"  data-placement="bottom" data-toggle="tooltip"  data-original-title="Tooltip on bottom" title="{{d.get('comments')}}">{{d.get('comments')}}</div>
+        {% end %}
+    </div>
+</div>
+{% end %}
+{% from logic.define_keras import LOSSES,METRICS%}
+<div class="form-group " >
+    <label class="col-sm-3 control-label"  >loss</label>
+    <div class="col-sm-6">
+        <select name="loss" class="form-control">
+        {% for loss in LOSSES %}
+            <option value="{{loss}}" {%if fix.get('loss','')==loss%} selected {%end%}>{{loss}}</option>
+        {% end %}
+        </select>
+             <div  class="form-control tooltips comments_tip"  data-placement="bottom" data-toggle="tooltip"  data-original-title="Tooltip on bottom" title="A loss function (or objective function, or optimization score function) is one of the two parameters required to compile a model:">A loss function (or objective function, or optimization score function) is one of the two parameters required to compile a model:</div>
+    </div>
+</div>
+<div class="form-group " >
+    <label class="col-sm-3 control-label"  >metrics</label>
+    <div class="col-sm-6" >
+        <select name="metrics" class="form-control chosen-select" multiple  metrics="{{','.join(fix.get('metrics',[]))}}">
+        {% for loss in METRICS %}
+            <option value="{{loss}}" >{{loss}}</option>
+        {% end %}
+        </select>
+         <div  class="form-control tooltips comments_tip"  data-placement="bottom" data-toggle="tooltip"  data-original-title="Tooltip on bottom" title="A metric is a function that is used to judge the performance of your model. Metric functions are to be supplied in the  metrics parameter when a model is compiled.">A metric is a function that is used to judge the performance of your model. Metric functions are to be supplied in the  metrics parameter when a model is compiled.</div>
+    </div>
+</div>
+<a value="{{data.get('optimizer','')}}" type="hidden" id='optimizer_val'>
+<script type="text/javascript">
+var metrics=$(".chosen-select").attr('metrics').split(',')
+$.each(metrics,function(k,v){
+    $.each($('.chosen-select option'),function(i,e){
+        if($(e).val()==v){
+                $(e).attr('selected',true)
+         }
+    })
+})
+$(".chosen-select").chosen({'width':'100%','white-space':'nowrap'});
+$('.chosen-select').trigger('chosen:updated');
+
+var opt_input=$('.optimizer_form').find('input[name]');
+$.each(opt_input,function(i,v){
+    var val=$(v).val()
+    if($(v).val()!='True'&&$(v).val()!='False'){
+        $(v).val(convertNUM(val))
+    }
+})
+function convertNUM(num) {
+    if(num.indexOf('e')>-1){
+        if(num.indexOf('-')>-1){
+            var long=num.split('-')[1]*1;
+            var arr_pouint=num.split('e')[0].split('.')
+            var key=0;
+            if(arr_pouint.length>1){
+                  key=num.split('e')[0].split('.')[1].length;
+            }
+            num=Number(num)
+            return num.toFixed(long+key)
+        }
+        if(num.indexOf('+')>-1){
+            var long=num.split('+')[1];
+            var key=num.split('e')[0]
+            long=Math.pow(10,long);
+            return key*long
+        }
+    }else{
+        return num
+    }
+}
+</script>

@@ -1,0 +1,97 @@
+
+#数值量程设置
+
+```
+* 
+    method:post,
+    url:/num/setting,
+    ParameterChecking:{
+        not None:code_name
+    },
+    RequestParam:{
+        "code_name":"",
+        other args
+    },
+    ReturnParam:{
+        status=True
+    }
+
+```
+http://127.0.0.1:9995/num/distill?code_name=nns_comger&key=f1
+
+#数值量程设置-提取
+
+```
+* 
+    method:get,
+    url:/num/distill,
+    ParameterChecking:{
+        not None:code_name，key
+    },
+    RequestParam:{
+        "code_name":"",
+        "key":(output或input 字段)
+    },
+    ReturnParam:{
+        'status':'True'，
+        'max':,
+        'min':
+    }
+
+```
+#数值量程设置-全部提取
+
+```
+* 
+    method:get,
+    url:/num/distill/all,
+    ParameterChecking:{
+        not None:code_name
+    },
+    RequestParam:{
+        "code_name":"",
+    },
+    ReturnParam:{
+        'status':'True'，
+        'data': {
+            x2: [
+            0,
+            1753.1942720537513
+            ],
+            x3: [
+            0,
+            3276.75
+            ],
+            x1: [
+            1.5489929924842236,
+            9.760083306310289
+            ],
+            x4: [
+            0,
+            6550.296389451227
+            ]
+            }
+    }
+
+```
+
+
+
+#数值量程设置-数据
+
+```
+* 
+    method:get,
+    url:/num/data,
+    ParameterChecking:{
+        not None:code_name
+    },
+    RequestParam:{
+        "code_name":"",
+    },
+    ReturnParam:{
+        'status':'True'，
+        'data':,
+    }
+
+```

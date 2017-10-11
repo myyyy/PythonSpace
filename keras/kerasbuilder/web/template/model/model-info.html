@@ -1,0 +1,613 @@
+<!DOCTYPE html
+        <html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>NNsBuilder</title>
+    <!-- <link href="../../static/web/css/style.default.css" rel="stylesheet"> -->
+    <link rel="stylesheet" href='{{ static_url("web/css/covercommon.css") }}'>
+    <link rel="stylesheet" href='{{ static_url("web/css/codemirror/codemirror.css") }}'>
+    <link rel="stylesheet" href='{{ static_url("web/css/codemirror/theme/ambiance.css") }}'>
+    <link rel="stylesheet" href='{{ static_url("libs/jqueryui/jquery-ui-1.10.3.full.min.css") }}'>
+    <link rel="stylesheet" href='{{ static_url("web/css/coverbootstrap.css") }}'>
+    <link rel="stylesheet" href='{{ static_url("libs/chosen.css") }}'>
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="js/html5shiv.js"></script>
+    <script src="js/respond.min.js"></script>
+    <![endif]-->
+    <style type="text/css">
+        .chosen-container-multi{
+            border:1px solid #ccc;
+        }
+        .train_log span{
+            display: block;
+        }
+        .train_log {
+            display: none;
+             background:#1c1e1f;
+            color:#fff;
+            border-radius: 6px;
+            padding:10px!important;
+            overflow-y:auto;
+        }
+        .table{
+            table-layout:fixed;
+        }
+        .table > tbody >  tr > td{
+         word-wrap:break-word;
+        }
+        .range_title div{
+            text-align: center;
+            color: #428bca;
+        }
+        .dataset_line .form-control{
+            width:85%;
+            float: left;
+        }
+    </style>
+</head>
+<body>
+    {% from logic.define import LAYER_MAP,OPTIMIZER_MAP%}
+<section>
+    <div class="leftpanel">
+
+        <div class="logopanel">
+            <h1><span>NNsBuilder</span></h1>
+        </div>
+        <!-- logopanel -->
+
+        <div class="leftpanelinner">
+            <div class="model_left">
+                <div class="title_modal">模型管理 <span class="glyphicon glyphicon-plus-sign add_model" data-toggle="modal" data-target=".model_add"></span></div>
+                <ul class="left_parts">
+                    {% for model in models%}
+                    <li _id="{{model.get('code_name','')}}" class="model_code_li" input="{{','.join(model.get('input',''))}}" output="{{','.join(model.get('output',''))}}" 
+                    loss_value="{{model.get('loss_value','')}}" metrics_value="{{model.get('metrics_value','')}}">{{model.get('name','')}}</li>
+                    {% end%}
+                </ul>
+            </div>
+            <!--model_left -->
+
+        </div>
+        <!-- leftpanelinner -->
+    </div>
+    <!-- leftpanel -->
+
+    <div class="mainpanel">
+        <div class="headerbar">
+                    <div class="header-right">
+                        <ul class="headermenu">
+                            <li style="list-style: none">
+                                <div class="btn-group">
+                                    <!-- <button type="button" class="btn btn-user dropdown-toggle" data-toggle="dropdown"> -->
+                                        {{username}}
+                                        <span class="caret"></span>
+                                    <!-- </button> -->
+   <!--                                  <ul class="dropdown-menu dropdown-menu-usermenu pull-right" >
+                                        <li><a href="#"><i class="glyphicon glyphicon-user"></i> 用户管理</a></li>
+                                        <li><a href="#"><i class="glyphicon glyphicon-cog"></i>系统设置</a></li>
+                                        <li><a href="#"><i class="glyphicon glyphicon-question-sign"></i> 修改密码</a></li>
+                                        <li><a href="login.html"><i class="glyphicon glyphicon-log-out"></i> 退出登录</a></li>
+                                    </ul> -->
+                                </div>
+                            </li>
+                        </ul>
+                    </div><!-- header-right -->
+        </div>
+        <!-- headerbar -->
+
+        <div class="pageheader" >
+            <span class="left_model"><span id="model_name" > </span>
+            <span>评测得分:</span>
+            <span class="kreas_score"></span></span>
+            <div style="float:right;margin-right: 20px">
+                <a class="btn btn-xs btn-success aipy_btn" >py文件下載</a>
+                <a class="btn btn-xs btn-black edit_model" data-toggle="modal" data-target=".model_add">编辑</a>
+                <a class="btn btn-xs btn-danger model_del" >删除</a>
+            </div>
+        </div>
+
+        <div class="contentpanel">
+            <div id="disabledTabWizard" class="basic-wizard">
+                <ul class="nav nav-pills nav-justified nav-disabled-click">
+                 <li class="active"><a href="#range_set" data-toggle="tab">数值的量程设置</a></li>
+                  <li ><a href="#compile_opt" data-toggle="tab">编译选项</a></li>
+                  <li ><a href="#model_structure" data-toggle="tab">模型结构</a></li>
+                  <li><a href="#practice_data" data-toggle="tab">训练数据</a></li>
+                  <li><a href="#modal_measure" data-toggle="tab">模型测评</a></li>
+                </ul>
+                <div class="tab-content modal_nav">
+                        <div class="tab-pane active" id="range_set">
+                                 <form class="validform form-horizontal form-bordered" action=''>
+                                 <div class="row range_title">
+                                     <div class="col-sm-2"></div>
+                                     <div class="col-sm-2">最小值</div>
+                                     <div class="col-sm-2">最大值</div>
+                                     <div class="col-sm-2">一般预警(标准差*N)</div>
+                                     <div class="col-sm-2">严重预警(标准差*N)</div>
+                                 </div>
+                                 <div class="range"></div>
+                                        <div class="panel-footer">
+                                            <div class="row">
+                                                <div class="col-sm-6 col-sm-offset-3">
+                                                    <button class="btn btn-success all_extract" type="button">全部提取</button>
+                                                    <button class="btn btn-black btn-setting-save" type="button">保存</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                      </div>
+                      <div class="tab-pane " id="model_structure">
+                            <form class="form">
+                                  <div class="row">
+                                    <div class="col-md-1"><h3 style="margin:0px 15px;"> Layers</h3></div>
+                                    <div class="col-md-6 list_group">
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-xs btn-default add_struct" data-toggle="modal" data-target=".list"> <span class="glyphicon glyphicon-plus"></span> 添加</button>
+                                            <button type="button" class="btn btn-xs btn-default down_load"><span class="glyphicon glyphicon-download"></span> 全部下载</button>
+                                            <button type="button" class="btn btn-xs btn-default import_btn" data-toggle="modal" data-target=".up_load"><span class="glyphicon glyphicon-export"></span> 上传</button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 code_group" style="display: none">
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-xs btn-default real_btn" ><span class="glyphicon glyphicon-repeat"></span> 同步</button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 codeview_group" style="display: none">
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-xs btn-default real_codeview" ><span class="glyphicon glyphicon-repeat"></span> 同步</button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-5">
+                                     <ul class="btn-group title_btn">
+                                            <li class="active btn btn-default list_btn"><a href="#list_model" data-toggle="tab"><strong>列表</strong></a></li>
+                                            <li class="btn btn-default code_btn"><a href="#code_edit" data-toggle="tab"><strong>代码块</strong></a></li>
+                                            <li class="btn btn-default preview_btn"><a href="#preview" data-toggle="tab"><strong>预览</strong></a></li>
+                                        </ul>
+
+                                    </div>
+                                    <!-- col-md-4 -->
+                                </div>
+                                <div class="tab-content">
+                                    <div class="tab-pane active " id="list_model">
+                                    </div>
+                                    <div class="tab-pane " id="code_edit">
+                                         <div class="panel panel-default panel-alt">
+                                               <textarea id="code2" name="code">
+                                                </textarea>    
+                                        </div><!-- panel -->
+                                    </div>
+                                    <div class="tab-pane" id="preview">
+                                        <div class="pre_look btn btn-white">
+                                            <img src=''>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                      </div>
+                      <div class="tab-pane " id="compile_opt">
+                                 <form class="validform form-horizontal form-bordered" action='/compile/edit'>
+                                        <input type="hidden" name="code_name">
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label">Optimizer</label>
+                                            <div class="col-sm-6">
+                                                <select class="form-control" name="optimizer">
+                                                {% for k,v in OPTIMIZER_MAP.items()%}
+                                                    <option value="{{k}}" comments = "{{v[1]}}">{{k}}</option>
+                                                {% end %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="optimizer_form"></div>
+                                        <div class="panel-footer">
+                                            <div class="row">
+                                                <div class="col-sm-6 col-sm-offset-3">
+                                                    <button class="btn btn-primary edit_optimizer" type="submit">保存编译选项</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                      </div>
+                      <div class="tab-pane" id="practice_data">
+                               <div class="table-btn  ">
+                                    <button class="btn btn-primary mr5 btn-exe btn-sm out_excel" >导出Excel(模板)
+                                    </button>
+                                    <button class="btn btn-primary mr5 btn-exe btn-sm import_excel" data-toggle="modal" data-target=".up_excel">导入Excel
+                                    </button>
+                                    <button class="btn btn-primary mr5 btn-exe btn-sm import_mongo" data-toggle="modal" data-target=".mongo">从Mongo导入
+                                    </button>
+                                    <button class="btn btn-primary mr5 btn-exe btn-sm train_set" data-toggle="modal" data-target=".train">训练设置
+                                    </button>
+                                    <button class="btn btn-primary mr5 btn-exe btn-sm _train" data-toggle="modal" data-target=".train_start">训练
+                                    </button>
+                                </div>
+                                <div class="clearfix"></div>
+                                <div class="col-md-12 practice_list">
+                                </div>
+                      </div>
+                      <div class="tab-pane" id="modal_measure">
+                                <div class="table-btn">
+                                            <button class="btn btn-sm btn-primary mr5 btn-exe eva_outexl" >导出Excel(模板)
+                                            </button>
+                                            <button class="btn btn-sm btn-primary mr5 btn-exe eva_inexl" data-toggle="modal" data-target=".up_excel">导入Excel
+                                            </button>
+                                            <button class="btn btn-sm btn-primary mr5 btn-exe eva_mongo" data-toggle="modal" data-target=".mongo">从Mongo导入
+                                            </button>
+                                            <button class="btn btn-sm btn-primary mr5 btn-exe eva_test" data-toggle="modal" data-target=".evaluate">测评
+                                            </button>
+                                </div>
+                                <div class="clearfix"></div>
+                                <div class="col-md-12 text_list">
+                                </div>
+                      </div>
+
+                </div><!-- tab-content -->
+                
+                <ul class="pager wizard">
+                    <li class="previous disabled"><a href="javascript:void(0)">上一步</a></li>
+                    <li class="next" style="float: right;"><a href="javascript:void(0)">下一步</a></li>
+                  </ul>
+                
+              </div>
+      </div>
+
+    </div>
+    <!-- mainpanel -->
+
+</section>
+<!-- 导入MongoDB数据 -->
+<div class="modal fade mongo" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true"
+     style="display: none;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button aria-hidden="true" data-dismiss="modal" class="close" type="button">×</button>
+                <h4 class="modal-title">导入MongoDB数据</h4>
+            </div>
+            <form class="validform form-horizontal form-bordered " action='/train/mongo/upload' reload="reload">
+            <div class="modal-body">
+                 <input type="hidden" name="code_name">
+                <div class="form-group">
+                    <label class=" col-sm-4 control-label">Mongourl</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" placeholder="ip:port/database/collection" name="url">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="blue col-sm-4 control-label">查询语句</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" placeholder='{k:v}' name="sql">
+                    </div>
+                </div>
+                <div class="mogo_exports">
+                    
+                </div>
+                    <div class="form-group">
+                        <label class="blue col-sm-4 control-label"></label>
+                        <div class="col-sm-6">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" name="is_del_history"> 清空历史数据
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+             <div class="modal-footer">
+                    <button class="btn btn-write" data-dismiss="modal">
+                        取消
+                    </button>
+                    <button class="btn btn-black btn_model_add" type="submit">
+                        完成
+                    </button>
+            </div>
+             </form>
+        </div>
+    </div>
+</div>
+
+<!-- 训练设置 -->
+<div class="modal fade train" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true"
+     style="display: none;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button aria-hidden="true" data-dismiss="modal" class="close" type="button">×</button>
+                <h4 class="modal-title train_title">训练设置</h4>
+            </div>
+            <form class="validform form-horizontal form-bordered " action='/train/setting/edit'   reload='reload'>
+            <div class="modal-body">
+            <input type="hidden" name="code_name">
+                <div class="form-group batch_size">
+                    <label class=" col-sm-4 control-label ">batch_size</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" placeholder="" name="batch_size" >
+                        <div  class="form-control tooltips comments_tip"  data-placement="bottom" data-toggle="tooltip"  data-original-title="Tooltip on bottom" title=" integer. Number of samples per gradient update." style="padding-top: 0px"> integer. Number of samples per gradient update.</div>
+                    </div>
+                </div>
+                <div class="form-group epochs">
+                    <label class="blue col-sm-4 control-label ">epochs</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control"  name="epochs"  datatype="n">
+                        <div  class="form-control tooltips comments_tip"  data-placement="bottom" data-toggle="tooltip"  data-original-title="Tooltip on bottom" title=" integer, the number of times to iterate over the training data arrays." style="padding-top: 0px"> integer, the number of times to iterate over the training data arrays.</div>
+                    </div>
+
+                </div>
+                <div class="form-group validation_split">
+                    <label class=" col-sm-4 control-label ">validation_split</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" placeholder="" name="validation_split">
+                        <div  class="form-control tooltips comments_tip"  data-placement="bottom" data-toggle="tooltip"  data-original-title="Tooltip on bottom" 
+                        title=" float between 0 and 1: fraction of the training data to be used as validation data. The model will set apart this fraction of the training data, will not train on it, and will evaluate the loss and any model metrics on this data at the end of each epoch." 
+                        style="padding-top: 0px"> float between 0 and 1: fraction of the training data to be used as validation data. The model will set apart this fraction of the training data, will not train on it, and will evaluate the loss and any model metrics on this data at the end of each epoch.</div>
+                    </div>
+                </div>
+                <div class="form-group shuffle">
+                    <label class="blue col-sm-4 control-label ">shuffle</label>
+                    <div class="col-sm-6">
+                        <div class="form-control " style="border:none;">
+                             <input type="radio" name="shuffle" id="true1"  value="true" checked="true">
+                                <label for="true1">true</label>
+                            <input type="radio" name="shuffle" id="false2"  value="false">
+                                <label for="false2">false</label>
+                        </div>
+                        <div  class="form-control tooltips comments_tip"  data-placement="bottom" data-toggle="tooltip"  data-original-title="Tooltip on bottom" title="boolean, whether to shuffle the training data before each epoch." style="padding-top: 0px">boolean, whether to shuffle the training data before each epoch.</div>
+                    </div>
+                    
+                </div>
+                <div class="form-group train_log">
+                </div>
+            </div>
+                <div class="modal-footer">
+                   <button class="btn btn-black btn_train_add" type="submit">
+                        保存
+                    </button>
+                </div>
+                </form>
+        </div>
+    </div>
+</div>
+<!-- 开始训练 -->
+<div class="modal fade train_start" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true"
+     style="display: none;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button aria-hidden="true" data-dismiss="modal" class="close" type="button">×</button>
+                <h4 class="modal-title train_title">训练</h4>
+            </div>
+            <form class="validform form-horizontal form-bordered " action='/train/setting/edit'   reload='reload'>
+            <div class="modal-body">
+            <input type="hidden" name="code_name">
+                <div class="train_log_title"></div>
+                <span class="train_result"></span>
+                <div class="form-group train_log">
+                    <div id='line_1'></div>
+                </div>
+            </div>
+                <div class="modal-footer">
+                    <button class="btn btn-danger btn_train_end" type="button" >
+                        终止
+                    </button>
+                    <button class="btn btn-success  btn_train_exec" type="button">
+                        开始训练
+                    </button>
+                </div>
+                </form>
+        </div>
+    </div>
+</div>
+<!-- 添加模型 -->
+<div class="modal fade model_add" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true"
+     style="display: none;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button aria-hidden="true" data-dismiss="modal" class="close" type="button">×</button>
+                <h4 class="modal-title">创建模型</h4>
+            </div>
+            <form class="validform form-horizontal form-bordered " action='/model/add'  reload="reload">
+            <div class="modal-body">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="disabledinput">模型名称</label>
+                        <div class="col-sm-6">
+                            <input type="text" placeholder="" class="form-control" name="name" datatype="*">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="disabledinput">模型代号</label>
+                        <div class="col-sm-6">
+                            <input type="text" class="form-control" name="code_name" datatype="*">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="disabledinput">输入</label>
+                        <div class="col-sm-6">
+                            <input type="text" class="form-control" name="input" datatype="*">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="disabledinput">输出</label>
+                        <div class="col-sm-6">
+                            <input type="text" class="form-control" name="output" datatype="*">
+                        </div>
+                    </div>
+                </div>
+                 <div class="modal-footer">
+                    <button class="btn btn-write" data-dismiss="modal">
+                        取消
+                    </button>
+                    <button class="btn btn-black btn_model_add" type="submit">
+                        完成
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- 添加模型结构 -->
+<div class="modal fade list" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true"
+         style="display: none;">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button aria-hidden="true" data-dismiss="modal" class="close" type="button">×</button>
+                    <h4 class="modal-title">添加模型结构</h4>
+                </div>
+                <form class="validform form-horizontal form-bordered form_layer" action="/layer/add" reload='reload' >
+                <div class="modal-body add_model_struct">
+                 <input type="hidden" class="form-control" name="code_name" >
+                        <div class="form-group">
+                            <label class="col-sm-4 control-label">Layer</label>
+                            <div class="col-sm-6">
+                                <select class="form-control" name="layer_name" >
+                                    {% for k,v in LAYER_MAP.items()%}
+                                    <option value="{{k}}" comments = "{{v[1]}}">{{k}}</option>
+                                    {% end %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="layer"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-write" data-dismiss="modal">
+                            取消
+                        </button>
+                        <button class="btn btn-black  add_struct_sub" type="submit">
+                            确定
+                        </button>
+                    </div>
+                 </form>
+             </div>
+        </div>
+    </div>
+<!--  上传模型 -->
+<div class="modal fade up_load" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true"
+     style="display: none;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button aria-hidden="true" data-dismiss="modal" class="close" type="button">×</button>
+                <h4 class="modal-title">上传文件</h4>
+            </div>
+            <form class=" form-horizontal form-bordered " reload="reload" method="POST" enctype="multipart/form-data" id='fileupload'>
+            <div class="modal-body">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="disabledinput">文件名称</label>
+                        <div class="col-sm-6" class="col-sm-6 ">
+                            <input type="file" placeholder="文件" class="form-control" name="uploadfile" >
+                            <input type="hidden" name='code_name'>
+                            <div id="file"></div>
+                        </div>
+                    </div>
+             </div>
+                <div class="modal-footer">
+                    <button class="btn btn-write" data-dismiss="modal">
+                        取消
+                    </button>
+                    <button class="btn btn-black" type="submit">
+                        完成
+                    </button>
+                </div>
+                </form>
+            </div>
+        </div>
+ </div>
+ <!-- 导入Excel -->
+ <div class="modal fade up_excel" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true"
+     style="display: none;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button aria-hidden="true" data-dismiss="modal" class="close" type="button">×</button>
+                <h4 class="modal-title">从Excel导入</h4>
+            </div>
+            <form class=" form-horizontal form-bordered " reload="reload" method="POST" enctype="multipart/form-data" id='excelupload'>
+            <div class="modal-body">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="disabledinput">文件名称</label>
+                        <div class="col-sm-6" class="col-sm-6 ">
+                            <input type="file" placeholder="文件" class="form-control" name="uploadfile" >
+                            <input type="hidden" name='code_name'>
+                            <div id="file"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="blue col-sm-3 control-label"></label>
+                        <div class="col-sm-6">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" name="is_del_history"> 清空历史数据
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+                <div class="modal-footer">
+                    <button class="btn btn-write" data-dismiss="modal">
+                        取消
+                    </button>
+                    <button class="btn btn-black" type="submit">
+                        完成
+                    </button>
+                </div>
+                </form>
+            </div>
+        </div>
+ </div>
+ <!-- 编辑训练数据 -->
+<div class="modal fade inAndout" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true"
+     style="display: none;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button aria-hidden="true" data-dismiss="modal" class="close" type="button">×</button>
+                <h4 class="modal-title">编辑输入/出模型</h4>
+            </div>
+            <form class="validform form-horizontal form-bordered " action='/train/edit' reload='reload' >
+            <input type="hidden" name="code_name">
+            <input type="hidden" name="_id">
+            <div class="modal-body clone_box">
+             </div>
+                <div class="modal-footer">
+                    <button class="btn btn-write" data-dismiss="modal">
+                        取消
+                    </button>
+                    <button class="btn btn-black btn_traindata" type="submit">
+                        完成
+                    </button>
+                </div>
+                </form>
+            </div>
+        </div>
+</div>
+<!-- 克隆用勿删 -->
+<div class="form-group clone_input" style="display: none">
+    <label class="col-sm-4 control-label"  ></label>
+    <div class="col-sm-6">
+        <input type="text"  class="form-control"  >
+    </div>
+</div>
+<script type="text/javascript" src='{{ static_url("libs/js/jquery-1.10.2.min.js") }}'></script>
+<script type="text/javascript" src='{{ static_url("libs/underscore-min.js") }}'></script>
+<script type="text/javascript" src='{{ static_url("libs/js/bootstrap.min.js") }}'></script>
+<script type="text/javascript" src='{{ static_url("libs/codemirror/codemirror.js") }}'></script>
+<script type="text/javascript" src='{{ static_url("libs/codemirror/mode/python.js") }}'></script>
+<script type="text/javascript" src='{{ static_url("libs/js/bootstrap-wizard.min.js") }}'></script>
+<script type="text/javascript" src='{{ static_url("libs/js/jquery.validate.min.js") }}'></script>
+<script type="text/javascript" src='{{ static_url("libs/js/jquery.cookies.js") }}'></script>
+<script type="text/javascript" src='{{ static_url("libs/Validform_v5.3.1_min.js") }}'></script>
+<script type="text/javascript" src='{{ static_url("libs/jqueryui/jquery-ui-1.10.3.full.min.js") }}'></script>
+<script type="text/javascript" src='{{ static_url("libs/jquery.tablednd.js") }}'></script>
+<script type="text/javascript" src='{{ static_url("web/js/comger_util.js") }}'></script>
+<script type="text/javascript" src='{{ static_url("libs/jquery.form.js") }}'></script>
+<script type="text/javascript" src='{{ static_url("libs/chosen.jquery.min.js") }}'></script>
+<script type="text/javascript" src='{{ static_url("libs/plotly-latest.min.js") }}'></script>
+<script type="text/javascript" src='{{ static_url("web/js/model_all.js") }}'></script>
+
+</body>
+</html>

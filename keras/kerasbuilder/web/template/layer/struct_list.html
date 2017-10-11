@@ -1,0 +1,36 @@
+
+    <div class="col-md-12">
+        <div class="table-responsive">
+            <table class="table table-dark mb30" id="table_struct">
+                <thead>
+                    <tr>
+                      <th width="5">#</th>
+                       <th width=10%>Layer Type</th>
+                       <th width=75%>Params</th>
+                       <th width=10%>操作</th>
+                   </tr>
+                </thead>
+                <tbody>
+                {% for id in data.get('struct_order',[])%}
+                  {% for no,layer in enumerate(data.get('struct',[]))%}
+                        {% if id ==layer.get('oid','') %}
+                         <tr oid="{{layer.get('oid','')}}">
+                             <td>{{no+1}}</td>
+                             <td class="layerName">{{layer.get('layer_name','')}}</td>
+                             <td>
+                             {% if layer.get('params','')%}
+                                  {{layer.get('params','')}}
+                             {% end %}
+                             </td>
+                             <td>
+                                 <a data-toggle="modal" data-target=".list" ><button class="btn btn-xs btn-primary edit_struct">编辑</button></a>
+                                 <a data-toggle="modal" data-target="" ><button class="btn btn-xs btn-danger delet_struct">删除</button></a>
+                             </td>
+                         </tr>
+                      {% end %}
+                  {% end %}
+                {% end %}
+                </tbody>
+            </table>
+        </div>
+    </div>

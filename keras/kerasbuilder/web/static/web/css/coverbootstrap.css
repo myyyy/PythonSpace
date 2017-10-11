@@ -1,0 +1,209 @@
+
+         #Validform_msg{
+             display: none!important;
+         }
+        .modal_nav > .tab-pane{
+             height: 625px;
+         }
+          #Validform_msg{
+         display: none!important;
+         }
+
+        .table-btn{
+              float: right;
+              margin-right: 10px;
+              margin-bottom: 10px;
+        }
+        .current{
+              background-color: #1CAF9A;
+              border-radius: 8px;
+        }
+
+        .leftpanelinner .left_parts {
+            padding-left: 0px; 
+        }
+        .leftpanelinner .model_left li{
+            font-size: 16px;
+            list-style: none;
+            padding: 5px 53px;
+            margin-top: 5px;
+        }
+        .title_btn{
+              float: right;
+              margin-right: 15px;
+         }
+        .title_btn li a{
+              display: block;
+              width: 100%;
+         }
+         #model_name{
+            font-size: 20px;
+         }
+         .btn-user{
+            background: #e4e7ea !important;
+            font-size: 18px;
+         }
+         .comments_tip{
+            border:none;
+            color:#1CAF9A ;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            padding-bottom: 0px;
+         }
+        .modal-dialog {
+            right: auto;
+            left: 50%;
+            width: 600px;
+            padding-top: 130px;
+            padding-bottom: 30px;
+        }
+        .close{
+            color: #fff;
+            text-shadow: 0 1px 0 #000;
+            opacity: .5; 
+        }
+        .close:hover{
+            color: #fff;
+            opacity: .9; 
+        }
+/******* dialog样式重构 ********/
+        #dialog-confirm{
+          display: none;
+          color:#535763;
+        }
+        .ui-widget-overlay {
+            background: none repeat scroll 0 0 rgba(0, 0, 0, 0.8)!important;
+            opacity: 1 !important;
+            filter: alpha(opacity=100) !important;
+            z-index: 1040 !important;
+        }
+        .ui-dialog, .ui-jqdialog{
+          border:none;
+          box-shadow: 0 5px 15px rgba(0, 0, 0, .5);
+          padding: 0;
+          border-radius: 6px;
+          z-index:9990;
+          background: #fff;
+        }
+        .ui-dialog .ui-dialog-content{
+          padding:0;
+          width: 350px!important;
+        }
+        .ui-dialog .ui-dialog-titlebar, .ui-jqdialog .ui-dialog-titlebar, .ui-dialog .ui-jqdialog-titlebar, .ui-jqdialog .ui-jqdialog-titlebar {
+            background-color: #42464e;
+            font-size: 14px;
+            padding: 15px 15px 13px;
+            color: #fff;
+        }
+        .ui-dialog .ui-dialog-titlebar-close:before, .ui-jqdialog .ui-dialog-titlebar-close:before, .ui-dialog .ui-jqdialog-titlebar-close:before, .ui-jqdialog .ui-jqdialog-titlebar-close:before {
+            content: "\f00d";
+            display: inline;
+            font-family: FontAwesome;
+            font-size: 16px;
+        }
+        .ui-dialog .ui-dialog-titlebar-close{
+          color: #fff;
+          opacity: 0.8;
+          top: 50%;
+          outline: none;
+          position: absolute;
+            right: 13px;
+            border: none;
+            background: transparent;
+            /*top: 50%;*/
+            width: 21px;
+            margin: -8px 0 0 0;
+            padding: 1px;
+            height: 20px;
+        }
+        .ui-dialog .ui-dialog-buttonpane{
+          background: none;
+          padding:7px 7px 11px;
+          margin-top:0px;
+          border-top: 1px solid #e5e5e5;
+        }
+        .ui-dialog .ui-dialog-buttonset button{
+          display: inline-block;
+          padding: 6px 12px;
+          margin-bottom: 0;
+          font-size: 14px;
+          font-weight: normal;
+          line-height: 1.428571429;
+          text-align: center;
+          white-space: nowrap;
+          vertical-align: middle;
+          cursor: pointer;
+          border: 1px solid transparent;
+          border-radius: 4px;
+          -webkit-user-select: none;
+          color: #FFF;
+          background-color: #42464e;
+          border-color: #475671;
+          outline:none;
+        }
+        .ui-dialog .ui-dialog-buttonset button:hover{
+          color: #fff;
+          background-color: #263A58;
+          border-color: #3d4c67;
+        }
+        .ui-dialog .ui-dialog-buttonset button:nth-child(1){
+          color: #333;
+          background-color: #fff;
+          border-color: #ccc;
+        }
+        .ui-dialog .ui-dialog-buttonset button:nth-child(1):hover{
+          color: #333;
+          background-color: #ebebeb;
+          border-color: #adadad;
+        }
+        .ui-button-text-only .ui-button-text {
+            padding:0;
+        }
+        .motorgroup-name{
+            line-height: 25px;
+            font-size: 16px;
+            color:#E6EBF5;
+            margin-left:10px;
+        }
+        .motorgroup-name a{
+            color: #E6EBF5;
+        }
+        .motorgroup-name a:hover{
+            color:#fff;
+            text-decoration: underline!important;
+        }
+
+        .Validform_right {
+            color: #71b83d;
+            padding-left: 15px;
+            background: url(../img/right.jpg) no-repeat left 3px;
+        }
+        .Validform_wrong {
+            color: #D9534F;
+            padding-left: 16px;
+            white-space: nowrap;
+            background: url(../img/error.png) no-repeat left 3px;
+        }
+        .Validform_loading {
+            padding-left:20px;
+            background:url(../img/onLoad.gif) no-repeat left center;
+        }
+        .Validform_error {
+            background-color:#ffe7e7;
+        }
+        #loader {
+            position: absolute;
+            left: 46%;
+            top: 450px;
+            font-size: 30px;
+            margin-left: -180px;
+            color: #fff;
+            background: rgba(255,255,255,0.2);
+            border-radius: 30px;
+            padding: 15px 40px;
+            z-index: 9999;
+            opacity: 1;
+        }
+
+

@@ -1,0 +1,31 @@
+
+    {% for d in  default.get('params',[])%}
+    <div class="form-group">
+        <label class="col-sm-4 control-label tooltips" for="readonlyinput" >{{d.get('name','')}}</label>
+
+        <div class="col-sm-6">
+        {% if d.get('dt','')=='bool'%}
+            <div class="form-control " style="border:none;">
+                    <input type="radio" name="{{d.get('name','')}}"  value="True"  {% if data.get(d.get('name')) ==True%} checked{% end %}>
+                      <label for="">true</label>
+                    <input type="radio" name="{{d.get('name','')}}"   value="False" {% if data.get(d.get('name')) ==False%} checked{% end %}>
+                       <label for="">false</label>
+             </div>
+             <div  class="form-control tooltips comments_tip"  data-placement="bottom" data-toggle="tooltip"  data-original-title="Tooltip on bottom" title="{{d.get('comments')}}" style="padding-top: 0px">{{d.get('comments')}}</div>
+        {% else %}
+            <input type="text" class="form-control" 
+            value="{% if data.get(d.get('name',''),'')%}{{data.get(d.get('name'),'')}}{% elif d.get('default','')%}{{d.get('default','')}}{% end %}" 
+            name="{{d.get('name')}}" 
+            comments="{{d.get('comments')}}" 
+            {% if d.get('regex')%}
+            datatype="{{d.get('regex')}}"
+            {% end %} >
+            <div  class="form-control tooltips comments_tip"  data-placement="bottom" data-toggle="tooltip"  data-original-title="Tooltip on bottom" title="{{d.get('comments')}}">{{d.get('comments')}}</div>
+            {% end %}
+        </div>
+    </div>
+    {% end %}
+{% if data%}
+<input name="oid" value="{{oid}}" type="hidden">
+<input name="code_name" value="{{code_name}}" type="hidden">
+{% end %}

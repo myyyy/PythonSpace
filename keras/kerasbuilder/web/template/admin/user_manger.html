@@ -1,0 +1,236 @@
+<!DOCTYPE html
+        <html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>NNsBuilder</title>
+
+    <!-- <link href="../../static/web/css/style.default.css" rel="stylesheet"> -->
+    <link href="../../static/web/css/covercommon.css" rel="stylesheet">
+    <link href="../../static/web/css/coverbootstrap.css" rel="stylesheet">
+     <link rel="stylesheet" href="../../static/web/css/codemirror/codemirror.css" />
+     <link rel="stylesheet" href="../../static/web/css/codemirror/theme/ambiance.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="js/html5shiv.js"></script>
+    <script src="js/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+<section>
+
+    <div class="leftpanel">
+
+        <div class="logopanel">
+            <h1><span>NNsBuilder</span></h1>
+        </div>
+        <!-- logopanel -->
+
+        <div class="leftpanelinner">
+            <div class="model_left">
+                <div class="title_modal">后台管理</div>
+                <ul class="left_parts">
+                    <li>用户管理</li>
+                    <li>系统设置</li>
+                </ul>
+            </div>
+            <!--model_left -->
+
+        </div>
+        <!-- leftpanelinner -->
+    </div>
+    <!-- leftpanel -->
+    <div class="mainpanel">
+        <div class="headerbar">
+                    <div class="header-right">
+                        <ul class="headermenu">
+                            <li>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                        admin
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-usermenu pull-right" style="margin-top: 0">
+                                        <li><a href="profile.html"><i class="glyphicon glyphicon-user"></i> 用户管理</a></li>
+                                        <li><a href="#"><i class="glyphicon glyphicon-cog"></i>系统设置</a></li>
+                                        <li><a href="#"><i class="glyphicon glyphicon-question-sign"></i> 修改密码</a></li>
+                                        <li><a href="login.html"><i class="glyphicon glyphicon-log-out"></i> 退出登录</a></li>
+                                    </ul>
+                                </div>
+                            </li>
+                        </ul>
+                    </div><!-- header-right -->
+        </div>
+        <!-- headerbar -->
+
+
+
+        <div class="contentpanel" style="margin: 10px">
+            <div class="col-md-12" style="padding-bottom: 10px">
+             <a href="#" class="btn btn-black" >新建用户 <span class="glyphicon glyphicon-plus"></span></a>
+            </div>
+            <div class="col-md-12">
+                <div class="table-responsive">
+                    <table class="table table-dark mb30">
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>用户名</th>
+                            <th>邮箱</th>
+                            <th>昵称</th>
+                            <th>电话</th>
+                            <th>权限</th>
+                            <th>操作</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td>1</td>
+                            <td>admin</td>
+                            <td>119366@q.com</td>
+                            <td>hanhong</td>
+                            <td>13132109281</td>
+                            <td></td>
+                            <td><a href="#" class="btn btn-xs btn-default">修改</a><a href="#" class="btn btn-xs btn-danger">删除</a></td>
+                          </tr>
+                        <tr>
+                            <td>２</td>
+                            <td>admin</td>
+                            <td>119366@q.com</td>
+                            <td>hanhong</td>
+                            <td>13132109281</td>
+                            <td></td>
+                            <td><a href="#" class="btn btn-xs btn-default">修改</a><a href="#" class="btn btn-xs btn-danger">删除</a></td>
+                          </tr>
+                         <tr>
+                            <td>３</td>
+                            <td>admin</td>
+                            <td>119366@q.com</td>
+                            <td>hanhong</td>
+                            <td>13132109281</td>
+                            <td></td>
+                            <td><a href="#" class="btn btn-xs btn-default">修改</a><a href="#" class="btn btn-xs btn-danger">删除</a></td>
+                          </tr>
+                        <tr>
+                            <td>４</td>
+                            <td>admin</td>
+                            <td>119366@q.com</td>
+                            <td>hanhong</td>
+                            <td>13132109281</td>
+                            <td></td>
+                            <td><a href="#" class="btn btn-xs btn-default">修改</a><a href="#" class="btn btn-xs btn-danger">删除</a></td>
+                          </tr>
+                        </tbody>
+                    </table>
+                </div><!-- table-responsive -->
+            </div>
+             <ul class="pagination" style="margin-left:40%;">
+                   <li class="active"><a href="#">1</a></li>
+                   <li><a href="#">2</a></li>
+                   <li><a href="#">3</a></li>
+                   <li><a href="#">4</a></li>
+                   <li><a href="#">5</a></li>
+             </ul>
+        </div>
+
+    </div>
+    <!-- mainpanel -->
+
+</section>
+
+
+    <div class="modal fade list" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true"
+         style="display: none;">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button aria-hidden="true" data-dismiss="modal" class="close" type="button">×</button>
+                    <h4 class="modal-title">窗口标题</h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal form-bordered">
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Optimizer</label>
+
+                            <div class="col-sm-6">
+                                <select class="form-control">
+                                    <option value="">SGD</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="disabledinput">lr</label>
+
+                            <div class="col-sm-6">
+                                <input type="text" placeholder="0.01" id="disabledinput" class="form-control"
+                                        >
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="readonlyinput">momentum</label>
+
+                            <div class="col-sm-6">
+                                <input type="text" value="Read Only Input" id="" class="form-control"
+                                       placeholder="0">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">decay</label>
+
+                            <div class="col-sm-6">
+                                <input type="text" placeholder="0" class="form-control">
+
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">nesterov</label>
+
+                            <div class="col-sm-6">
+                                <input type="text" placeholder="false" title="" data-toggle="tooltip"
+                                       data-trigger="hover" class="form-control tooltips"
+                                       data-original-title="Tooltip goes here">
+                            </div>
+                        </div>
+
+                    </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-write">
+                            取消
+                        </button>
+                        <button class="btn btn-black" type="submit">
+                            完成
+                        </button>
+                    </div>
+             </div>
+        </div>
+    </div>
+
+        <script src="../../static/libs/js/jquery-1.10.2.min.js"></script>
+        <!-- <script src="../static/js/jquery-migrate-1.2.1.min.js"></script> -->
+        <script src="../../static/libs/js/bootstrap.min.js"></script>
+          <script src="../../static/libs/codemirror/codemirror.js"></script>
+        <script src="../../static/libs/codemirror/formatting.js"></script>
+        <script src="../../static/libs/codemirror/mode/xml.js"></script>
+        <script src="../../static/libs/codemirror/mode/javascript.js"></script>
+        <script src="../../static/libs/js/jquery.validate.min.js"></script>
+        <script>
+            $(function() {
+                  CodeMirror.fromTextArea(document.getElementById("code"), {
+                                mode: {name: "xml", alignCDATA: true},
+                                lineNumbers: true
+                            });
+                            
+            })
+              
+</script>
+</body>
+</html>

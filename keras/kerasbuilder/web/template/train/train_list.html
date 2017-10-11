@@ -1,0 +1,87 @@
+    <div class="table-responsive">
+        <table class="table table-dark mb30" id="{{uri}}_data">
+            <thead>
+                <tr>
+                    {% for i in _input%}
+                    <th >{{i}}</th>
+                    {% end %} {% for o in output%}
+                    <th >{{o}}</th>
+                    {% end %}
+                    <th width=10% >操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in data%}
+                <tr _id="{{d.get('_id','')}}">
+                    {% for i in _input%}
+                    <td>
+                        {{d.get(i,'')}}
+                    </td>
+                    {% end %} {% for i in output%}
+                    <td>
+                        {{d.get(i,'')}}
+                    </td>
+                    {% end %}
+                    <td>
+                        <a data-toggle="modal" data-target=".inAndout">
+                            <button class="btn btn-xs btn-primary edit_train_data">编辑</button>
+                        </a>
+                        <a >
+                            <button class="btn btn-xs btn-danger del_train_data">删除</button>
+                        </a>
+                    </td>
+                </tr>
+                {% end %}
+            </tbody>
+        </table>
+    </div>
+
+<div class="text-center pageindex">
+<ul class="pagination class_bridge_page pagination-sm">
+    {% for index in range(page.get('start'),page.get('end')+1) %}
+    <li value='{{ index }}' class="{% if index == page.get('page_index',1) %} active {% end %} class_bridge_page">
+        <a>{{ index }}</a>
+    </li>
+    {% end %}
+</ul>
+<label style="margin-top:15px;float:left;">总共{{ page.get('allcount', 0) }}个记录.共有{{ page.get('page_num', 0) }}页.</label>
+</div>
+<script type="text/javascript">
+/**    $('#practice_data').one('click','li', function() {
+        var code_name=$('.left_parts .current').attr('_id');
+        var page_index = $(this).attr('value');
+        console.log(page_index)
+        $.get( "/train/list/html?code_name="+code_name+"&page_index="+page_index+"",function(rs){
+                    $('#practice_data .practice_list').html(' ');
+                    $('#practice_data .practice_list').append(rs.data);
+        })
+    });
+    $('#modal_measure').one('click','li' ,function() {
+        var code_name=$('.left_parts .current').attr('_id');
+        console.log('page_index')
+        var page_index = $(this).attr('value');
+        $.get( "/evaluate/list/html?code_name="+code_name+"&page_index="+page_index+"",function(rs){
+                    $('#modal_measure .text_list').html(' ');
+                    $('#modal_measure .text_list').append(rs.data);
+        })
+    });**/
+    $('#practice_data li').one('click', function() {
+        var code_name=$('.left_parts .current').attr('_id');
+        var page_index = $(this).attr('value');
+        console.log(page_index)
+        $.get( "/train/list/html?code_name="+code_name+"&page_index="+page_index+"",function(rs){
+                    $('#practice_data .practice_list').html(' ');
+                    $('#practice_data .practice_list').append(rs.data);
+        })
+    });
+    $('#modal_measure li').one('click',function() {
+        var code_name=$('.left_parts .current').attr('_id');
+        console.log('page_index')
+        var page_index = $(this).attr('value');
+        $.get( "/evaluate/list/html?code_name="+code_name+"&page_index="+page_index+"",function(rs){
+                    $('#modal_measure .text_list').html(' ');
+                    $('#modal_measure .text_list').append(rs.data);
+        })
+    });
+</script>
+
