@@ -1,0 +1,11 @@
+pymongo==2.7
+numpy==1.7.0
+
+pip install psutil
+pip install pydot
+
+apt-get install graphviz
+apt-get install python-h5py
+apt-get install libhdf5-dev
+
+easy_install keras
