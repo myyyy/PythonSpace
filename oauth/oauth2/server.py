@@ -13,23 +13,13 @@ import hashlib
 from bson import ObjectId
 from mongo_util import MongoIns
 import oauth2 as oauth
+from reportapi import get_handlers
 
 EXPIRES_IN = 86400
 
 
 class BaseHandler(tornado.web.RequestHandler):
-    def verfiy_token(self):
-        oauth_request = oauth.Request.from_request(self.request.uri)
-        access_token = oauth_request.parameters.get('access_token')
-        access_token = oauth.RsaEncryption().decrypt(refresh_str)
-        owner = refresh_token.split(',')[0]
-        pwd = refresh_token.split(',')[-1]
-        user = MongoIns().m_find_one('passport', dbname='cas',dbhost = __conf__.CAS_DB_HOST, _id = ObjectId(owner))
-        if pwd == user.get('pwd'):
-            return True,owner,'access_token验证通过'
-        else:
-            return False,None,'access_token验证失败'
-
+    pass
 
 
 @url(r"/oauth2/appinfo")
@@ -40,22 +30,24 @@ class AppInfoHandler(BaseHandler):
     :APPSECRET
     """
     def get(self):
-        self.render('oauth2/regapp.html')
+        allh = get_handlers()
+        self.render('oauth2/regapp.html',allh=allh)
 
     def post(self):
         url = self.get_argument('url','')
         name = self.get_argument('name','')
+        access = self.get_argument('access','')
         description = self.get_argument('description','')
         client_id=ObjectId()
         secret = oauth.RsaEncryption().encrypt(str(client_id))
-        MongoIns().m_insert("oauth2_app", dbname='cas',dbhost = __conf__.CAS_DB_HOST,**{'url':url,'_id':client_id,'secret':secret,'name':name,'description':description})
+        MongoIns().m_insert("oauth2_app", dbname='cas',dbhost = __conf__.CAS_DB_HOST,
+            **{'url':url,'_id':client_id,'secret':secret,'name':name,'description':description,'access':access})
 
         self.write(dict(client_id=str(client_id),secret=secret))
 
 @url(r"/oauth2/auth")
 class RequestTokenHandler(BaseHandler):
     def get(self):
-        # code 753ff4c4c3f779f08ee12ef905e5887c7565e1362047f7e7eb3767215f3aa96aaaeaf1c59779db8c79f3789b595e9b068a3c251a5f3a661c80b4bad496579d0685d28fb2a5a1aeea70218cc3032302559cc9e3b41c8e4d05af807728bd99eaf019cacc68e5ec214ba4995f978c895eca163e6c0761b2eb5514278b0af80e873d
         # http://127.0.0.1:8887/oauth2/auth?client_id=59dc294535f9a85e465d75b1&redirect_uri=http://baidu.com&response_type=code&state=sina7d3521db1a403d39cee2815ff42289ce
         uri = self.request.uri
         oauth_request = oauth.Request.from_request(self.request.uri)
@@ -69,7 +61,7 @@ class RequestTokenHandler(BaseHandler):
         client_id = oauth_request.parameters.get('client_id')
         app = MongoIns().m_find_one("oauth2_app", dbname='cas',dbhost = __conf__.CAS_DB_HOST,url=redirect_uri)
         if hashlib.md5(pwd).hexdigest() == user.get('pwd') and app:
-            code = oauth.Code().set(client_id,user.get('_id'))
+            code = oauth.Code().set(user.get('_id'))
             oauth_request = oauth.Request.from_request('GET',self.request.uri)
             redirect_uri= redirect_uri+'?code=' +code+'&state='+oauth_request.parameters.get('state','')
             self.redirect(redirect_uri)
@@ -106,16 +98,16 @@ class AppAccessTokenHandler(BaseHandler):
     def get(self):
         oauth_request = oauth.Request.from_request(self.request.uri)
         # 验证appid＆secret
-        # http://127.0.0.1:8888/oauth2/app/access_token?client_id=59dd902635f9a8237f081f85&secret=38bbc0721f6662b3c49a9bc83221f6515768bdacc1eef49741c8deaa55a483d882eabd391fe2b4866c5aad09148af05031f5936b204b8a9777fda55d0a0458d65842cb7c240b74c2082c215118a81188ea50ce4eb957dd8321c5a4cca26852e23abbda149745b6fb9c74d1cf2c736cb6ba17c5ba1973e600990c635a9e8ea3f0
+        # http://127.0.0.1:8888/oauth2/app/access_token?client_id=59df2a6235f9a852f687e612&secret=c2e81a083b0b6ec16bafa580fe7887be16da4ae40cd01f7aa62d1901b8a73ed08c0e7274c3e23927dfe3a4a9729bdbe704568e5d812dd9aa369e2edadbf47fe895fb488c34b651237075529acd0c56ccad1bf09bee24d8f568d14ea933fb81606f6b64409a773310101c8573a3ed1fb4c3bacf5e6e173f8abddae56c45f044db
         client_id = oauth_request.parameters.get('client_id')
         secret = oauth_request.parameters.get('secret')
         app = MongoIns().m_find_one('oauth2_app', dbname='cas',dbhost = __conf__.CAS_DB_HOST, _id = ObjectId(client_id))
         if app.get('secret') == secret:
-            consumer=oauth.Consumer(client_id,secret)
-            token, expires_in = oauth.AppToken().get_token(consumer)
+            token, expires_in = oauth.AppToken().get_token({'client_id':client_id,'owner':client_id,
+                'secret':client_id})
             self.write(dict(status=True,access_token=token,expires_in=expires_in))
             status,msg = oauth.AppToken().verify(token)
-            print msg
+            print msg,status
         else:
             self.write(dict(status=False,msg='app验证失败'))
 
@@ -147,9 +139,10 @@ class Reoauth(BaseHandler):
         user = MongoIns().m_del('oauth2_user', owner = owner,dbname='cas',dbhost = __conf__.CAS_DB_HOST)
         self.wfile(dict(status=True,msg='取消授权成功'))
 
-#权限列表todo
-@url(r"/oauth2/resource")
-class ResourceHandler(BaseHandler):
-    def get(self):
-        status,owner,msg = self.verfiy_token()
+
+
+
+
+
+
 
