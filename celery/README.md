@@ -1,0 +1,1 @@
+参考：[celery文档](http://docs.celeryproject.org/en/latest/userguide/application.html)
