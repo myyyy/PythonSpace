@@ -1,6 +1,7 @@
+# -*- coding:utf-8 -*-
+
 import os
 import sys
-# -*- coding:utf-8 -*-
 
 app_path = lambda f: os.path.join(os.getcwd(), f)
 

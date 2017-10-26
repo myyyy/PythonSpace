@@ -84,8 +84,8 @@ def quick_sort(l,left,right):
         l[right] = l[left]
     l[right] = key
     print left-1,low,high
-    myqs(l, low, left - 1)
-    myqs(l, left + 1, high)
+    quick_sort(l, low, left - 1)
+    quick_sort(l, left + 1, high)
     return l
 
 
