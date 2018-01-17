@@ -40,7 +40,7 @@ class AppInfoHandler(BaseHandler):
         description = self.get_argument('description','')
         client_id=ObjectId()
         secret = oauth.RsaEncryption().encrypt(str(client_id))
-        MongoIns().m_insert("oauth2_app", dbname='cas',dbhost = __conf__.CAS_DB_HOST,
+        MongoIns().m_insert("oauth2_app", dbname='cas',host = __conf__.CAS_DB_HOST,
             **{'url':url,'_id':client_id,'secret':secret,'name':name,'description':description,'access':access})
 
         self.write(dict(client_id=str(client_id),secret=secret))
