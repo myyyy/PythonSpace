@@ -1,0 +1,25 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<title>Directory listing for {{handler.request.uri}}</title>
+
+<body>
+        <form action="/" method="post">
+                        所在区:
+                        <select name="quhao">
+                                {%for d in data.keys()%}
+                                <option value="{{d}}">{{d}} </option>
+                                {%end%}
+                        </select>
+                        想要去的区:
+                        <select name="toquhao">
+                                        {%for d in data.keys()%}
+                                        <option value="{{d}}">{{d}} </option>
+                                        {%end%}
+                        </select>
+                邮箱:<input value="" name="email"  placeholder="Email" type="text">
+                <button type="submit">提交</button>
+        {% raw xsrf_form_html() %}
+        </form>
+</body>
+
+</html>
