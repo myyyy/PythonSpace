@@ -15,7 +15,7 @@ class stack(object):
         if self.isempty():
             print 'now is empty'
         else:
-            self.stack.pop()
+            return self.stack.pop()
     def push(self,x):
         if self.isfull():
             print 'stack is full'

@@ -87,6 +87,34 @@ Python中对象之间的赋值是按引用传递的，如果要拷贝对象需�
     __name__：一种约定，Python内部的名字，用来与用户自定义的名字区分开，防止冲突
     _name：一种约定，用来指定变量私有
     __name：解释器用_classname__name来代替这个名字用以区别和其他类相同的命名
+    1、在解释器中：在这种情况下，“_”代表交互式解释器会话中上一条执行的语句的结果。这种用法首先被标准CPython解释器采用，然后其他类型的解释器也先后采用
+
+    ```
+    正如所预料的，“_internal_use”并未改变，而“__method_name”却被变成了“_ClassName__method_name”。此时，如果你创建A的一个子类B，那么你将不能轻易地覆写A中的方法“__method_name”。
+    Python
+
+    >>> class B(A): 
+    ... def __method_name(self): 
+    ... pass 
+    ... 
+    >>> dir(B()) 
+    ['_A__method_name', '_B__method_name', ..., '_internal_use']
+    1
+    2
+    3
+    4
+    5
+    6
+    >>> class B(A): 
+    ... def __method_name(self): 
+    ... pass 
+    ... 
+    >>> dir(B()) 
+    ['_A__method_name', '_B__method_name', ..., '_internal_use']
+    这里的功能几乎和Java中的final方法和C++类中标准方法（非虚方法）一样。
+    
+    ```
+
 
  想要更加详细的了解这两者的区别，请点击：Python中的下划线（译文）
 
