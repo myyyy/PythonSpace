@@ -66,6 +66,8 @@ def bobble_sort(lists):
     return lists
 
 
+
+
 def quick_sort(l,left,right):
     """
     参考http://developer.51cto.com/art/201403/430986.htm

@@ -22,7 +22,6 @@ define("port", default=8999, help="run on the given port", type=int)
 class Application(tornado.web.Application):
     def __init__(self):
         handlers = [
-            # (r"/", IndexHandler),
             (r"\/*.*", IndexHandler),
         ]
         settings = dict(
