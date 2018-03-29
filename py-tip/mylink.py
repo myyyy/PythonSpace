@@ -88,16 +88,41 @@ class LinkedList(object):
             tmp = head.next
             head.next,node.next = node.next,head
             head = tmp
-        return p.next 
+        return p.next
+    def recurse(self,head,newhead):    #递归，head为原链表的头结点，newhead为反转后链表的头结点  
+        if head is None:  
+            return ;  
+        if head.next is None:  
+            print 'head.next.neno'
+            newhead=head;  
+        else :  
+            print head.val,head.next.val
+            import pdb;pdb.set_trace()
+            newhead=self.recurse(head.next,newhead); 
+            # print '1',head.next.next.val,head.next.val
+            print 'x',head.val
+            head.next.next=head; 
+            print '``',head.val,head.next.val,head.next.next.val
+             
+            head.next=None;  
+            
+            print 'end', head.val,head.next
+            # self.show(head)
+            
+        return newhead;  
 if __name__ == '__main__':
-    a=[2,1,3,6,2,4]
+    a=[1,2,3,4,5,6]
     link = LinkedList()
     head = link.creat(a)
     LinkedList().show(head)
     # head = LinkedList()._inster_sort(head)
-    link.append(8)
+    # link.append(8)
     a = link.get(2)
-    print a.val
-    l = link.delete(0)
     # print a.val
-    LinkedList().show(head)
+    l = link.delete(0)
+    newhead=None
+    print head.val
+    z = link.recurse(head,newhead)
+    # LinkedList().show(z)
+    # print a.val
+    # LinkedList().show(head)
